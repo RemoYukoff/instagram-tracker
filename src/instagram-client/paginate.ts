@@ -1,4 +1,5 @@
 import type { UserNode } from "../shared/types";
+import { getSettings } from "../storage/settings";
 import { getDsUserId } from "./cookies";
 import { fetchFollowingPage } from "./graphql";
 import { pacedDelay } from "./rate-limiter";
@@ -26,6 +27,7 @@ export async function fetchFullFollowingList(
   onProgress?: (accountsFetched: number, page: number, totalCount: number) => void,
 ): Promise<UserNode[]> {
   const viewerId = await getDsUserId();
+  const settings = await getSettings();
   const nodes: UserNode[] = [];
   let after: string | null = null;
   let cycle = 0;
@@ -42,7 +44,7 @@ export async function fetchFullFollowingList(
 
     if (!page.hasNextPage) break;
     after = page.endCursor;
-    await pacedDelay(cycle);
+    await pacedDelay(cycle, settings);
   }
 
   return nodes;

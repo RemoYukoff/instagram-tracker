@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Instagram Tracker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Local-only tracker for who doesn't follow you back on Instagram, and who unfollowed you.",
-  "permissions": ["cookies"],
+  "permissions": ["cookies", "alarms", "storage"],
   "host_permissions": [
     "https://www.instagram.com/*",
     "https://*.cdninstagram.com/*",

@@ -2,15 +2,21 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import type { UserNode } from "../shared/types";
 import type { ScanBroadcast } from "../shared/messages";
 import {
+  DEFAULT_SETTINGS,
   getNonFollowers,
+  getSettings,
   getState,
   getUnfollowerViews,
   getWhitelistViews,
+  saveSettings,
+  type ScanSettings,
   type UnfollowerView,
   type WhitelistView,
 } from "../storage";
 import { clearUnfollowers, removeUnfollower } from "../storage/unfollowers";
 import { addToWhitelist, removeFromWhitelist } from "../storage/whitelist";
+import { SettingsIcon } from "./icons/SettingsIcon";
+import { Settings } from "./Settings";
 import { SwitchableColumn } from "./SwitchableColumn";
 import { UnfollowersList } from "./UnfollowersList";
 
@@ -25,6 +31,8 @@ export function App() {
   const [whitelist, setWhitelist] = useState<WhitelistView[]>([]);
   const [takenAt, setTakenAt] = useState<number | null>(null);
   const [scanStatus, setScanStatus] = useState<ScanStatus>({ phase: "idle" });
+  const [settings, setSettings] = useState<ScanSettings>(DEFAULT_SETTINGS);
+  const [showSettings, setShowSettings] = useState(false);
 
   const reload = useCallback(async () => {
     const [state, nf, uf, wl] = await Promise.all([
@@ -41,6 +49,7 @@ export function App() {
 
   useEffect(() => {
     void reload();
+    void getSettings().then(setSettings);
   }, [reload]);
 
   useEffect(() => {
@@ -100,6 +109,12 @@ export function App() {
     [reload],
   );
 
+  const handleSaveSettings = useCallback(async (next: ScanSettings) => {
+    await saveSettings(next);
+    setSettings(next);
+    setShowSettings(false);
+  }, []);
+
   const scanning = scanStatus.phase === "scanning";
 
   return (
@@ -119,7 +134,18 @@ export function App() {
         )}
         {scanStatus.phase === "error" && <span class="status status--error">Scan failed: {scanStatus.message}</span>}
         {takenAt !== null && <span class="status">Last scan {new Date(takenAt).toLocaleString()}</span>}
+        <button
+          class="icon-btn settings-toggle"
+          title="Settings"
+          onClick={() => setShowSettings(true)}
+        >
+          <SettingsIcon />
+        </button>
       </section>
+
+      {showSettings && (
+        <Settings settings={settings} onSave={(s) => void handleSaveSettings(s)} onClose={() => setShowSettings(false)} />
+      )}
 
       <div class="columns">
         <SwitchableColumn
