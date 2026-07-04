@@ -1,0 +1,380 @@
+:root {
+  --font-display: Cambria, Constantia, "Times New Roman", Georgia, serif;
+  --font-mono: Consolas, "Cascadia Mono", ui-monospace, "Liberation Mono", monospace;
+
+  --bg: #121110;
+  --bg-elevated: #1a1815;
+  --ink: #ece6d9;
+  --ink-dim: #9c9385;
+  --border: rgba(236, 230, 217, 0.14);
+  --border-soft: rgba(236, 230, 217, 0.08);
+
+  --amber: #c78a3d;
+  --olive: #7f8f5e;
+  --red: #b3402f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-mono);
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+  background: var(--bg);
+  color: var(--ink);
+  position: relative;
+}
+
+/* Subtle grain so the flat dark background reads as paper/film rather than a UI
+   fill -- a repeating noise tile blended over everything at low opacity. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+main {
+  position: relative;
+}
+
+.disclaimer {
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border);
+  padding: 0.85rem 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  margin: 2.5rem 0 0;
+}
+
+.disclaimer__label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--red);
+  border: 1px solid var(--red);
+  padding: 0.1rem 0.4rem;
+  margin-right: 0.6rem;
+  transform: translateY(-1px);
+}
+
+.scan-control {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin: 0 0 2.25rem;
+  flex-wrap: wrap;
+}
+
+.scan-btn {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 1.5px solid var(--ink);
+  padding: 0.65rem 1.4rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.scan-btn:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.scan-btn:disabled {
+  color: var(--ink-dim);
+  border-color: var(--border);
+  cursor: default;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 6px,
+    var(--border-soft) 6px,
+    var(--border-soft) 12px
+  );
+  background-size: 200% 200%;
+  animation: stripe-scroll 1.4s linear infinite;
+}
+
+@keyframes stripe-scroll {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 34px 0;
+  }
+}
+
+.status {
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+}
+
+.status--error {
+  color: var(--red);
+}
+
+.columns {
+  display: grid;
+  /* minmax(0, 1fr) rather than plain 1fr -- otherwise a track's auto-sized min
+     (driven by its longest non-wrapping username/full-name) can grow that
+     column wider than the other one instead of the two staying equal. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.column {
+  min-width: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--ink-dim);
+  /* No horizontal padding here -- it lives on h2/.empty/.text-link/.account-row
+     instead, so a row's hover background can reach the card's left/right edges
+     rather than stopping short inside the card's padding. No bottom padding
+     either -- the last row's own vertical padding already provides that
+     spacing, and adding more here just left a gap below its border. */
+  padding: 1.1rem 0 0;
+  transition: border-top-color 0.15s ease;
+}
+
+.column--amber {
+  border-top-color: var(--amber);
+}
+
+.column--olive {
+  border-top-color: var(--olive);
+}
+
+.column--red {
+  border-top-color: var(--red);
+}
+
+.column h2 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.85rem;
+  padding: 0 1.25rem 0.65rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--bg);
+  background: var(--ink-dim);
+  padding: 0.2rem 0.4rem 0.15rem;
+}
+
+.column--red .count {
+  background: var(--red);
+  color: var(--ink);
+}
+
+.tabs {
+  display: flex;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.85rem;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  padding: 0 0 0.65rem;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tab--active {
+  color: var(--ink);
+}
+
+.tab--nonfollowers.tab--active {
+  border-bottom-color: var(--amber);
+}
+
+.tab--whitelist.tab--active {
+  border-bottom-color: var(--olive);
+}
+
+.tab--nonfollowers .count {
+  background: var(--amber);
+}
+
+.tab--whitelist .count {
+  background: var(--olive);
+}
+
+.empty {
+  color: var(--ink-dim);
+  font-style: italic;
+  font-size: 0.85rem;
+  padding: 0 1.25rem;
+}
+
+.text-link {
+  display: block;
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--red);
+  padding: 0 1.25rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.account-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.account-row:last-child {
+  border-bottom: none;
+}
+
+.account-row.clickable {
+  cursor: pointer;
+}
+
+.account-row.clickable:hover .username {
+  text-decoration: underline;
+}
+
+.account-row.clickable:hover {
+  background: rgba(236, 230, 217, 0.03);
+}
+
+.identity {
+  min-width: 0;
+  flex: 1;
+}
+
+.identity .full-name {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.identity .username {
+  display: block;
+  font-family: var(--font-mono);
+  color: var(--ink-dim);
+  font-size: 0.78rem;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.detected-at {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-btn--approve:hover {
+  background: var(--olive);
+  border-color: var(--olive);
+  color: var(--bg);
+}
+
+.icon-btn--remove:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--ink);
+}
+
+img,
+.profile-pic-placeholder {
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
+}
+
+.profile-pic-placeholder {
+  background: var(--border-soft);
+  color: var(--ink-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,45 @@
+name: Build extension
+
+on:
+  push:
+    branches: [master, main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # only needed for the release step below, on tag pushes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+      - name: Package dist/ as a downloadable extension zip
+        run: |
+          cd dist
+          zip -r ../instagram-tracker-extension.zip .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: instagram-tracker-extension
+          path: instagram-tracker-extension.zip
+
+      # Sideload distribution (no Chrome Web Store submission): pushing a
+      # "vX.Y.Z" tag publishes the same zip as a GitHub Release asset, so users
+      # can download it directly instead of digging through Actions runs.
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: instagram-tracker-extension.zip
+          generate_release_notes: true
